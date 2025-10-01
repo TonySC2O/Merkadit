@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`paises` (
   PRIMARY KEY (`idPais`),
   UNIQUE INDEX `countrycode_UNIQUE` (`countryCode` ASC) VISIBLE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -46,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`estados` (
     FOREIGN KEY (`idPais`)
     REFERENCES `merkadit`.`paises` (`idPais`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -65,6 +67,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`ciudades` (
     FOREIGN KEY (`idEstados`)
     REFERENCES `merkadit`.`estados` (`idEstado`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -87,6 +90,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`direcciones` (
     FOREIGN KEY (`idCiudad`)
     REFERENCES `merkadit`.`ciudades` (`idCiudad`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -100,13 +104,14 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`edificios` (
   `nombre` VARCHAR(100) NOT NULL,
   `uso` VARCHAR(20) NOT NULL,
   `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `del` TINYINT(1) NULL DEFAULT 0,
+  `del` TINYINT(1) NULL DEFAULT '0',
   PRIMARY KEY (`idEdificio`),
   INDEX `fk_edificios_direciones1_idx` (`idDireccion` ASC) VISIBLE,
   CONSTRAINT `fk_edificios_direciones1`
     FOREIGN KEY (`idDireccion`)
     REFERENCES `merkadit`.`direcciones` (`idDireccion`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -121,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`locales` (
   `nombre` VARCHAR(50) NOT NULL,
   `descripcion` VARCHAR(300) NOT NULL,
   `estado` ENUM('Disponible', 'Sin cupo') NOT NULL,
+  `tipo` ENUM('Gastronomico', 'Rental') NOT NULL,
   `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `del` TINYINT(1) NULL DEFAULT '0',
   PRIMARY KEY (`idLocal`),
@@ -129,6 +135,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`locales` (
     FOREIGN KEY (`idEdificio`)
     REFERENCES `merkadit`.`edificios` (`idEdificio`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -152,6 +159,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`kioskos` (
     FOREIGN KEY (`idLocal`)
     REFERENCES `merkadit`.`locales` (`idLocal`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -172,6 +180,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`usuarios` (
   PRIMARY KEY (`idUsuario`),
   UNIQUE INDEX `cedula_UNIQUE` (`cedula` ASC) VISIBLE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -204,6 +213,30 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`contratos` (
     FOREIGN KEY (`idUsuarioC`)
     REFERENCES `merkadit`.`usuarios` (`idUsuario`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `merkadit`.`alquileres`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `merkadit`.`alquileres` (
+  `idAlquiler` INT NOT NULL AUTO_INCREMENT,
+  `idContrato` INT NOT NULL,
+  `fechaInicio` DATETIME NOT NULL,
+  `fechaFinal` DATETIME NOT NULL,
+  `montoAlquiler` DECIMAL(15,2) NOT NULL,
+  `montoPagado` DECIMAL(15,2) NULL DEFAULT NULL,
+  `estadoPago` ENUM('Pagado', 'Sin pagar', 'Atraso') NOT NULL,
+  `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idAlquiler`),
+  INDEX `fk_Alquileres_contratos1_idx` (`idContrato` ASC) VISIBLE,
+  CONSTRAINT `fk_Alquileres_contratos1`
+    FOREIGN KEY (`idContrato`)
+    REFERENCES `merkadit`.`contratos` (`idContrato`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -216,16 +249,19 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`facturas` (
   `idContrato` INT NOT NULL,
   `idUsuario` INT NOT NULL,
   `codigo` VARCHAR(20) NOT NULL,
+  `referencia` INT NOT NULL,
+  `tipoPago` ENUM('Efectivo', 'Tarjeta') NOT NULL,
+  `confirmacion` VARCHAR(10) NOT NULL,
   `precioBruto` DECIMAL(15,2) NOT NULL,
   `IVA` DECIMAL(15,2) NOT NULL,
   `precioTotal` DECIMAL(15,2) NOT NULL,
-  `montoTarifa` DECIMAL(15,2) NOT NULL,
   `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `del` TINYINT(1) NULL DEFAULT '0',
   PRIMARY KEY (`idFactura`),
   UNIQUE INDEX `codigo_UNIQUE` (`codigo` ASC) VISIBLE,
   INDEX `fk_Facturas_contratos1_idx` (`idContrato` ASC) VISIBLE,
   INDEX `fk_Facturas_usuarios1_idx` (`idUsuario` ASC) VISIBLE,
+  UNIQUE INDEX `referencia_UNIQUE` (`referencia` ASC) VISIBLE,
   CONSTRAINT `fk_Facturas_contratos1`
     FOREIGN KEY (`idContrato`)
     REFERENCES `merkadit`.`contratos` (`idContrato`),
@@ -233,6 +269,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`facturas` (
     FOREIGN KEY (`idUsuario`)
     REFERENCES `merkadit`.`usuarios` (`idUsuario`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -257,6 +294,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`productos` (
     FOREIGN KEY (`idKiosko`)
     REFERENCES `merkadit`.`kioskos` (`idKiosko`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -280,6 +318,33 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`facturasxproductos` (
     FOREIGN KEY (`idProducto`)
     REFERENCES `merkadit`.`productos` (`idProducto`))
 ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `merkadit`.`gastos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `merkadit`.`gastos` (
+  `idGasto` INT NOT NULL AUTO_INCREMENT,
+  `idUsuario` INT NOT NULL,
+  `idKiosko` INT NOT NULL,
+  `nombre` VARCHAR(50) NOT NULL,
+  `descripcion` VARCHAR(200) NOT NULL,
+  `monto` DECIMAL(15,2) NOT NULL,
+  `fechaGasto` DATETIME NULL DEFAULT NULL,
+  `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idGasto`),
+  INDEX `fk_Gastos_usuarios2_idx` (`idUsuario` ASC) VISIBLE,
+  INDEX `fk_Gastos_kioskos1_idx` (`idKiosko` ASC) VISIBLE,
+  CONSTRAINT `fk_Gastos_kioskos1`
+    FOREIGN KEY (`idKiosko`)
+    REFERENCES `merkadit`.`kioskos` (`idKiosko`),
+  CONSTRAINT `fk_Gastos_usuarios2`
+    FOREIGN KEY (`idUsuario`)
+    REFERENCES `merkadit`.`usuarios` (`idUsuario`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -310,10 +375,10 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`movimientos` (
   `idMovimiento` INT NOT NULL AUTO_INCREMENT,
   `idUsuario` INT NOT NULL,
   `idProducto` INT NOT NULL,
-  `idFactura` INT NULL,
+  `idFactura` INT NULL DEFAULT NULL,
   `tipo` ENUM('Entrada', 'Salida') NOT NULL,
   `descripcion` VARCHAR(300) NOT NULL,
-  `monto` DECIMAL(15,2) NOT NULL DEFAULT 0,
+  `monto` DECIMAL(15,2) NOT NULL DEFAULT '0.00',
   `cantidad` INT NOT NULL,
   `cantAntes` INT NOT NULL,
   `cantDespues` INT NOT NULL,
@@ -323,18 +388,44 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`movimientos` (
   INDEX `fk_Restocks_usuarios1_idx` (`idUsuario` ASC) VISIBLE,
   INDEX `fk_Restocks_Productos1_idx` (`idProducto` ASC) VISIBLE,
   INDEX `fk_movimientos_facturas1_idx` (`idFactura` ASC) VISIBLE,
+  CONSTRAINT `fk_movimientos_facturas1`
+    FOREIGN KEY (`idFactura`)
+    REFERENCES `merkadit`.`facturas` (`idFactura`),
   CONSTRAINT `fk_Restocks_Productos1`
     FOREIGN KEY (`idProducto`)
     REFERENCES `merkadit`.`productos` (`idProducto`),
   CONSTRAINT `fk_Restocks_usuarios1`
     FOREIGN KEY (`idUsuario`)
-    REFERENCES `merkadit`.`usuarios` (`idUsuario`),
-  CONSTRAINT `fk_movimientos_facturas1`
-    FOREIGN KEY (`idFactura`)
-    REFERENCES `merkadit`.`facturas` (`idFactura`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    REFERENCES `merkadit`.`usuarios` (`idUsuario`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `merkadit`.`pagosalquiler`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `merkadit`.`pagosalquiler` (
+  `idPagoAlquiler` INT NOT NULL AUTO_INCREMENT,
+  `idUsuario` INT NOT NULL,
+  `idAlquiler` INT NOT NULL,
+  `descripcion` VARCHAR(300) NOT NULL,
+  `monto` DECIMAL(15,2) NOT NULL,
+  `pagoAntes` DECIMAL(15,2) NOT NULL,
+  `pagoDespues` DECIMAL(15,2) NOT NULL,
+  `postTime` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`idPagoAlquiler`),
+  INDEX `fk_PagosAlquiler_usuarios1_idx` (`idUsuario` ASC) VISIBLE,
+  INDEX `fk_PagosAlquiler_Alquileres1_idx` (`idAlquiler` ASC) VISIBLE,
+  CONSTRAINT `fk_PagosAlquiler_Alquileres1`
+    FOREIGN KEY (`idAlquiler`)
+    REFERENCES `merkadit`.`alquileres` (`idAlquiler`),
+  CONSTRAINT `fk_PagosAlquiler_usuarios1`
+    FOREIGN KEY (`idUsuario`)
+    REFERENCES `merkadit`.`usuarios` (`idUsuario`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -353,6 +444,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`permisos` (
   UNIQUE INDEX `codigo_UNIQUE` (`codigo` ASC) VISIBLE,
   UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -370,6 +462,7 @@ CREATE TABLE IF NOT EXISTS `merkadit`.`roles` (
   PRIMARY KEY (`idRol`),
   UNIQUE INDEX `tipo_UNIQUE` (`tipo` ASC) VISIBLE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 1
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -460,78 +553,96 @@ COLLATE = utf8mb4_0900_ai_ci;
 
 
 -- -----------------------------------------------------
--- Table `merkadit`.`Gastos`
+-- Table `merkadit`.`Descuentos`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `merkadit`.`Gastos` (
-  `idGasto` INT NOT NULL AUTO_INCREMENT,
-  `idUsuario` INT NOT NULL,
-  `idKiosko` INT NOT NULL,
-  `nombre` VARCHAR(50) NOT NULL,
-  `descripcion` VARCHAR(200) NOT NULL,
-  `monto` DECIMAL(15,2) NOT NULL,
-  `fechaGasto` DATETIME NULL,
+CREATE TABLE IF NOT EXISTS `merkadit`.`Descuentos` (
+  `idDescuento` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(70) NOT NULL,
+  `codigo` VARCHAR(10) NOT NULL,
+  `descuento` DECIMAL(15,2) NOT NULL,
   `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idGasto`),
-  INDEX `fk_Gastos_usuarios2_idx` (`idUsuario` ASC) VISIBLE,
-  INDEX `fk_Gastos_kioskos1_idx` (`idKiosko` ASC) VISIBLE,
-  CONSTRAINT `fk_Gastos_usuarios2`
-    FOREIGN KEY (`idUsuario`)
-    REFERENCES `merkadit`.`usuarios` (`idUsuario`)
+  `del` TINYINT(1) NULL DEFAULT 0,
+  PRIMARY KEY (`idDescuento`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 1;
+
+
+-- -----------------------------------------------------
+-- Table `merkadit`.`tarifas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `merkadit`.`tarifas` (
+  `idTarifa` INT NOT NULL AUTO_INCREMENT,
+  `idFactura` INT NOT NULL,
+  `idContrato` INT NOT NULL,
+  `tarifaVenta` DECIMAL(15,2) NOT NULL,
+  `monto` DECIMAL(15,2) NOT NULL,
+  `montoPagado` DECIMAL(15,2) NOT NULL,
+  `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `del` TINYINT(1) NULL DEFAULT 0,
+  PRIMARY KEY (`idTarifa`),
+  INDEX `fk_tarifas_facturas1_idx` (`idFactura` ASC) VISIBLE,
+  INDEX `fk_tarifas_contratos1_idx` (`idContrato` ASC) VISIBLE,
+  CONSTRAINT `fk_tarifas_facturas1`
+    FOREIGN KEY (`idFactura`)
+    REFERENCES `merkadit`.`facturas` (`idFactura`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Gastos_kioskos1`
-    FOREIGN KEY (`idKiosko`)
-    REFERENCES `merkadit`.`kioskos` (`idKiosko`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `merkadit`.`Alquileres`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `merkadit`.`Alquileres` (
-  `idAlquiler` INT NOT NULL AUTO_INCREMENT,
-  `idContrato` INT NOT NULL,
-  `fechaInicio` DATETIME NOT NULL,
-  `fechaFinal` DATETIME NOT NULL,
-  `montoAlquiler` DECIMAL(15,2) NOT NULL,
-  `montoPagado` DECIMAL(15,2) NULL,
-  `estadoPago` ENUM('Pagado', 'Sin pagar', 'Atraso') NOT NULL,
-  `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idAlquiler`),
-  INDEX `fk_Alquileres_contratos1_idx` (`idContrato` ASC) VISIBLE,
-  CONSTRAINT `fk_Alquileres_contratos1`
+  CONSTRAINT `fk_tarifas_contratos1`
     FOREIGN KEY (`idContrato`)
     REFERENCES `merkadit`.`contratos` (`idContrato`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = InnoDB
+AUTO_INCREMENT = 1;
 
 
 -- -----------------------------------------------------
--- Table `merkadit`.`PagosAlquiler`
+-- Table `merkadit`.`pagosTarifas`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `merkadit`.`PagosAlquiler` (
-  `idPagoAlquiler` INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `merkadit`.`pagosTarifas` (
+  `idpagoTarifas` INT NOT NULL AUTO_INCREMENT,
   `idUsuario` INT NOT NULL,
-  `idAlquiler` INT NOT NULL,
+  `idTarifa` INT NOT NULL,
   `descripcion` VARCHAR(300) NOT NULL,
-  `monto` DECIMAL(15,2) NULL,
+  `monto` DECIMAL(15,2) NOT NULL,
   `pagoAntes` DECIMAL(15,2) NOT NULL,
   `pagoDespues` DECIMAL(15,2) NOT NULL,
-  `postTime` DATETIME NULL,
-  PRIMARY KEY (`idPagoAlquiler`),
-  INDEX `fk_PagosAlquiler_usuarios1_idx` (`idUsuario` ASC) VISIBLE,
-  INDEX `fk_PagosAlquiler_Alquileres1_idx` (`idAlquiler` ASC) VISIBLE,
-  CONSTRAINT `fk_PagosAlquiler_usuarios1`
+  `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idpagoTarifas`),
+  INDEX `fk_pagosTarifas_tarifas1_idx` (`idTarifa` ASC) VISIBLE,
+  INDEX `fk_pagosTarifas_usuarios1_idx` (`idUsuario` ASC) VISIBLE,
+  CONSTRAINT `fk_pagosTarifas_tarifas1`
+    FOREIGN KEY (`idTarifa`)
+    REFERENCES `merkadit`.`tarifas` (`idTarifa`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_pagosTarifas_usuarios1`
     FOREIGN KEY (`idUsuario`)
     REFERENCES `merkadit`.`usuarios` (`idUsuario`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+AUTO_INCREMENT = 1;
+
+
+-- -----------------------------------------------------
+-- Table `merkadit`.`DescuentosxFacturas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `merkadit`.`DescuentosxFacturas` (
+  `idDescuento` INT NOT NULL,
+  `idFactura` INT NOT NULL,
+  `montoDescuento` DECIMAL(15,2) NOT NULL,
+  `postTime` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `fk_DescuentosxFacturas_Descuentos1_idx` (`idDescuento` ASC) VISIBLE,
+  INDEX `fk_DescuentosxFacturas_facturas1_idx` (`idFactura` ASC) VISIBLE,
+  CONSTRAINT `fk_DescuentosxFacturas_Descuentos1`
+    FOREIGN KEY (`idDescuento`)
+    REFERENCES `merkadit`.`Descuentos` (`idDescuento`)
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_PagosAlquiler_Alquileres1`
-    FOREIGN KEY (`idAlquiler`)
-    REFERENCES `merkadit`.`Alquileres` (`idAlquiler`)
+  CONSTRAINT `fk_DescuentosxFacturas_facturas1`
+    FOREIGN KEY (`idFactura`)
+    REFERENCES `merkadit`.`facturas` (`idFactura`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
